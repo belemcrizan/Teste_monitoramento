@@ -1,0 +1,19 @@
+services:
+  vertice:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      VERTICE_ENV: local
+      VERTICE_OBJECT_STORE: local
+      VERTICE_EVENT_BUS: memory
+      VERTICE_CASE_REPOSITORY: memory
+      VERTICE_ARTIFACT_DIR: /app/artifacts
+    volumes:
+      - ./artifacts:/app/artifacts
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+

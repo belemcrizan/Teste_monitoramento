@@ -1,0 +1,39 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EvidenceBucketObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject"],
+      "Resource": "<EVIDENCE_BUCKET_ARN>/<PREFIX>/*"
+    },
+    {
+      "Sid": "EvidenceBucketList",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "<EVIDENCE_BUCKET_ARN>",
+      "Condition": {
+        "StringLike": {"s3:prefix": ["<PREFIX>/*"]}
+      }
+    },
+    {
+      "Sid": "PublishCaseEvents",
+      "Effect": "Allow",
+      "Action": ["sqs:SendMessage"],
+      "Resource": "<CASE_EVENTS_QUEUE_ARN>"
+    },
+    {
+      "Sid": "UseEvidenceKmsKey",
+      "Effect": "Allow",
+      "Action": ["kms:Decrypt", "kms:Encrypt", "kms:GenerateDataKey"],
+      "Resource": "<EVIDENCE_KMS_KEY_ARN>"
+    },
+    {
+      "Sid": "InvokeApprovedBedrockModel",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel"],
+      "Resource": "<APPROVED_BEDROCK_MODEL_ARN>"
+    }
+  ]
+}
+
