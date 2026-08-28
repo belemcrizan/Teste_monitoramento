@@ -14,6 +14,9 @@ Todo input precisa declarar granularidade, owner, chave, unidade, timezone, sem�
 | `ClientSnapshot` | cliente × vigência | segmento, perfil, objetivo, controle, limite de complexidade |
 | `MarketReference` | instrumento × instante | bid/ask/mid, dispersão, source, freshness |
 | `OtcTrade` | estrutura × negócio | prêmio, IPV, incerteza, liquidity band, modelo, snapshot, complexidade e cadeia |
+| `FixedIncomeTrade` | negócio de Renda Fixa | produto, emissor, duas pontas, papéis econômicos, capacidade, mesa/book/trader, PU, taxa, spread, duration e DV01 |
+| `FixedIncomeReference` | instrumento × instante | produto, PU/taxa/spread, curva, metodologia, fonte, freshness e confiança |
+| `MarketCoverageSnapshot` | instrumento × janela | fonte, universo, ratio de cobertura, contagem observada e esperada |
 | `RelationshipEdge` | relação × vigência | origem/destino, tipo, valid from/to, source, confiança e método |
 | `LoadManifest` | extração/carga | contagem, financeiro, data, versão de contrato e SHA-256 |
 
@@ -37,6 +40,9 @@ Nulo não significa zero.
 | referência de mercado | manipulação fica inconclusiva quando o padrão depende dela |
 | patrimônio médio | churning fica inconclusivo |
 | IPV/modelo/snapshot | OTC retorna `INCONCLUSIVE_VALUATION` |
+| referência de Renda Fixa | conduta, resposta e principal versus cliente retornam `INCONCLUSIVE` |
+| cobertura do denominador | participação observada retorna `INCONCLUSIVE`; nunca vira market share |
+| papel econômico da ponta | quality issue explícita e limitação de principal versus cliente |
 | snapshot do cliente | cenários dependentes são bloqueados pelo quality gate |
 | contraparte | o negócio não participa da métrica relacional por par |
 
@@ -46,11 +52,27 @@ O quality gate compara:
 
 - record count de negócios confirmados;
 - financeiro bruto derivado de `price × quantity`;
+- contagem e financeiro próprios de Renda Fixa;
 - duplicidade de `trade_id`;
 - integridade mínima de snapshots;
 - presença de referências críticas.
 
-Divergência do manifesto ou duplicidade crítica bloqueia todos os detectores. Warnings de cobertura podem permitir execução degradada quando o próprio detector possui caminho inconclusivo.
+Divergência do manifesto ou duplicidade crítica bloqueia o catálogo afetado. Warnings
+de referência, cobertura e resolução de ponta permitem execução apenas quando o detector
+possui um caminho inconclusivo explícito.
+
+## Semântica específica de Renda Fixa
+
+- `price_unit` é o PU negociado, não preço genérico de tela;
+- `yield_rate` usa taxa decimal (`0.135` = 13,5% a.a. conforme convenção da fonte);
+- `spread_bps` usa pontos-base;
+- `financial_value` vem da origem e é reconciliado; não é recalculado silenciosamente;
+- `buyer_actor_type` e `seller_actor_type` separam cliente, Tesouraria proprietária e
+  outras instituições;
+- toda referência possui `reference_time`, fonte e versão metodológica;
+- seleção `latest_at` só aceita referência conhecida no instante analisado;
+- `MarketCoverageSnapshot` declara o denominador. Sem ele, há amostra, não participação
+  de mercado defensável.
 
 ## Finding
 
@@ -91,4 +113,3 @@ Para integrar uma fonte real:
 5. reconciliar amostra com a origem;
 6. congelar golden records;
 7. habilitar um cenário em shadow mode.
-

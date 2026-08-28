@@ -17,11 +17,13 @@ from .sample_data import build_benign_dataset, build_demo_dataset
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="vertice", description="VÉRTICE Surveillance Intelligence")
+    parser = argparse.ArgumentParser(
+        prog="vertice", description="VÉRTICE Surveillance Intelligence"
+    )
     parser.add_argument("--version", action="version", version="vertice 0.1.0")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    demo = sub.add_parser("demo", help="executa os quatro golden cases")
+    demo = sub.add_parser("demo", help="executa o catálogo completo de golden cases")
     demo.add_argument("--output", default="artifacts", help="diretório para evidências e relatório")
     demo.add_argument("--json", action="store_true", help="imprime o run completo em JSON")
     demo.add_argument("--policy", help="arquivo JSON de política versionada")
@@ -54,8 +56,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             print("VÉRTICE — execução concluída")
             print(f"run_id: {run.run_id}")
             print(f"quality: {'PASS' if run.quality.passed else 'FAIL'}")
-            print(f"findings: {len(run.findings)} | alerts: {len(run.alerts)} | cases: {len(run.cases)}")
-            print(f"scenario_coverage: {run.metrics['scenario_coverage']}/4")
+            print(
+                f"findings: {len(run.findings)} | alerts: {len(run.alerts)} | cases: {len(run.cases)}"
+            )
+            print(
+                "scenario_coverage: "
+                f"{run.metrics['scenario_coverage']}/{run.metrics['scenario_catalog_size']}"
+            )
             print(f"report: {report_path.resolve()}")
         return 0 if run.quality.passed else 2
     if args.command == "validate":

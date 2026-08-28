@@ -9,20 +9,29 @@ def render_run_report(run: PipelineRun) -> str:
     scenario_counts: dict[str, int] = {}
     for finding in run.findings:
         scenario_counts[finding.scenario] = scenario_counts.get(finding.scenario, 0) + 1
-    scenario_rows = "\n".join(
-        f"| {scenario} | {count} |" for scenario, count in sorted(scenario_counts.items())
-    ) or "| Nenhum | 0 |"
-    case_rows = "\n".join(
-        (
-            f"| `{case.case_id}` | `{case.subject_id}` | {case.state.value} | "
-            f"{case.priority:.2f} |"
+    scenario_rows = (
+        "\n".join(
+            f"| {scenario} | {count} |" for scenario, count in sorted(scenario_counts.items())
         )
-        for case in run.cases
-    ) or "| — | — | — | — |"
-    issue_rows = "\n".join(
-        f"| {issue.severity.value} | `{issue.code}` | {issue.message} |"
-        for issue in run.quality.issues
-    ) or "| — | Nenhuma ocorrência | A carga passou pelos gates configurados. |"
+        or "| Nenhum | 0 |"
+    )
+    case_rows = (
+        "\n".join(
+            (
+                f"| `{case.case_id}` | `{case.subject_id}` | {case.state.value} | "
+                f"{case.priority:.2f} |"
+            )
+            for case in run.cases
+        )
+        or "| — | — | — | — |"
+    )
+    issue_rows = (
+        "\n".join(
+            f"| {issue.severity.value} | `{issue.code}` | {issue.message} |"
+            for issue in run.quality.issues
+        )
+        or "| — | Nenhuma ocorrência | A carga passou pelos gates configurados. |"
+    )
     return f"""# VÉRTICE — Relatório de validação
 
 **Run:** `{run.run_id}`  
@@ -31,7 +40,8 @@ def render_run_report(run: PipelineRun) -> str:
 
 ## Leitura executiva
 
-O processamento recebeu **{run.quality.record_count} negócios**, produziu
+O processamento recebeu **{run.quality.record_count} negócios de mercado listado** e
+**{run.quality.fixed_income_record_count} negócios de Renda Fixa**, produziu
 **{len(run.findings)} achados técnicos**, correlacionou **{len(run.alerts)} alertas**
 e abriu **{len(run.cases)} casos**. Um achado não é uma acusação: é evidência
 estruturada que precisa de revisão humana e preserva limitações e dados ausentes.
@@ -41,6 +51,8 @@ estruturada que precisa de revisão humana e preserva limitações e dados ausen
 | Cenário | Findings |
 |---|---:|
 {scenario_rows}
+
+Cobertura exercitada: **{run.metrics['scenario_coverage']}/{run.metrics['scenario_catalog_size']}**.
 
 ## Qualidade e reconciliação
 
@@ -63,7 +75,7 @@ estruturada que precisa de revisão humana e preserva limitações e dados ausen
 - Score registra componentes, interações e versão da política.
 - Evidência é salva antes do resumo assistivo.
 - Falha do assistente não impede a abertura de casos.
-- Audit ledger encadeado por hash: **{"VÁLIDO" if run.metrics['audit_chain_valid'] else "INVÁLIDO"}**.
+- Audit ledger encadeado por hash: **{"VÁLIDO" if run.metrics["audit_chain_valid"] else "INVÁLIDO"}**.
 
 ## Limite da demonstração
 
@@ -71,4 +83,3 @@ Os dados são sintéticos e os limiares são ilustrativos. O resultado valida o
 comportamento do software e a rastreabilidade; não valida eficácia regulatória,
 performance com dados reais nem prontidão de produção.
 """
-

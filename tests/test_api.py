@@ -20,7 +20,8 @@ def test_health_and_demo(tmp_path: Path) -> None:
     response = client.post("/v1/demo/run")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["metrics"]["scenario_coverage"] == 4
+    assert payload["metrics"]["scenario_coverage"] == 8
+    assert payload["metrics"]["scenario_catalog_size"] == 8
     assert client.get("/v1/runs/latest").status_code == 200
 
 
@@ -49,4 +50,3 @@ def test_demo_page_is_human_friendly(tmp_path: Path) -> None:
     assert response.status_code == 200
     assert "VÉRTICE" in response.text
     assert "Executar golden cases" in response.text
-

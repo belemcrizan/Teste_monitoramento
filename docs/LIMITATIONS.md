@@ -27,6 +27,8 @@ Nenhuma dessas afirmações foi validada.
 - sem correções/eventos tardios em escala;
 - sem coortes reais;
 - sem catálogo/licenças de referências.
+- sem calendário de eventos corporativos e notícias integrado;
+- sem cobertura real comprovada para cada produto de Renda Fixa.
 
 ### Detectores
 
@@ -35,6 +37,11 @@ Nenhuma dessas afirmações foi validada.
 - manipulação cobre apenas composto de trade/reference/posição;
 - OTC usa uma fórmula demonstrativa, não biblioteca de pricing validada;
 - concentração usa universo observado, não market share.
+- participação de Renda Fixa usa denominador declarado, não prova dominância;
+- resposta pós-negócio mede associação temporal, não causalidade;
+- principal versus cliente não prova conflito, vantagem ou preço injusto;
+- referências sintéticas não substituem curvas, PU e metodologias aprovadas por Produto/Model Risk;
+- ainda não há regras especializadas completas para LF, CRI/CRA, títulos públicos e derivativos.
 
 ### Grafo
 
@@ -83,4 +90,3 @@ Apresente como prova de comportamento e contrato. Diferencie sempre:
 - dependente de validação humana/regulatória.
 
 Esse rigor aumenta a credibilidade do projeto; não reduz seu valor.
-

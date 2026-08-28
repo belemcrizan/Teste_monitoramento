@@ -5,7 +5,10 @@
 | Afirmação | Evidência | Status |
 |---|---|---|
 | A arquitetura é implementável | pipeline executável e pacote instalável | demonstrado |
-| Quatro eixos compartilham contratos | golden cases com cobertura 4/4 | demonstrado |
+| Oito cenários compartilham contratos | golden cases com cobertura 8/8 | demonstrado |
+| Referência não usa informação futura | testes de `latest_at` e horizon | demonstrado |
+| Ausência de referência/cobertura não vira baixo risco | testes inconclusivos de Tesouraria | demonstrado |
+| Participação identifica seu denominador | coverage source/universe/ratio no finding | demonstrado |
 | Crítico bloqueia processamento | testes de duplicidade e manifesto | demonstrado |
 | Dados ausentes não viram zero | caminhos inconclusivos OTC/churning/manipulação | demonstrado |
 | IDs lógicos são reprodutíveis | teste de replay em duas stores | demonstrado |
@@ -23,7 +26,10 @@ Os testes cobrem:
 
 - contratos e quality gates;
 - duplicidade e divergência de manifesto;
-- fórmulas/reason codes dos quatro detectores;
+- fórmulas/reason codes dos oito detectores;
+- PU, taxa, spread, resposta pós-negócio e principal versus cliente;
+- no-look-ahead, freshness e horizonte de referência;
+- cobertura ausente e referência ausente como `INCONCLUSIVE`;
 - controle benigno;
 - correlação multi-scenario;
 - replay e idempotência;
@@ -102,4 +108,3 @@ Medir por cenário e coorte:
 6. **Gate de produção:** segurança, DR, FinOps e ownership aprovados.
 
 Falha em um gate não deve ser escondida por resultado agregado.
-

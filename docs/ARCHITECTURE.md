@@ -5,7 +5,7 @@
 | Metadado | Valor |
 |---|---|
 | Documento | Arquitetura de solução, software, dados, segurança e implantação |
-| Versão | 1.0 |
+| Versão | 1.1 |
 | Atualizado em | 28 de agosto de 2026 |
 | Estado da solução | Executável localmente; preparada para adoção incremental na AWS |
 | Repositório | `belemcrizan/Teste_monitoramento` |
@@ -22,7 +22,7 @@ Não é necessário conhecer programação ou AWS para entender as primeiras se�
 | Se você é… | Leia primeiro |
 |---|---|
 | Comitê, diretoria ou sponsor | seções 2 a 5 e 24 |
-| Surveillance, Compliance ou analista | seções 5, 8, 9, 11 e 12 |
+| Surveillance, Compliance ou analista | seções 5, 8, 9, 11 e 12 e o [guia de Tesouraria](TREASURY_FIXED_INCOME.md) |
 | Engenharia ou arquitetura | seções 6 a 18 |
 | Cloud, Segurança ou SRE | seções 14 a 21 |
 | Model Risk, Auditoria ou Validação | seções 8 a 13 e 22 a 24 |
@@ -46,7 +46,7 @@ O documento distingue o que existe agora do que depende da integração instituc
 O VÉRTICE é uma plataforma investigativa de Trade Surveillance com quatro objetivos:
 
 1. validar integridade e suficiência dos dados antes de calcular sinais;
-2. detectar padrões técnicos em quatro eixos independentes;
+2. detectar padrões técnicos em oito cenários independentes;
 3. relacionar esses sinais sem transformar correlação em conclusão;
 4. entregar um caso rastreável para análise e decisão humana.
 
@@ -57,6 +57,10 @@ A solução foi desenhada como **local-first e cloud-ready**. O mesmo núcleo de
 - contratos canônicos validados;
 - manifesto, reconciliação e quality gate fail-closed;
 - detectores de concentração, comportamento associado à manipulação, churning e OTC complexo;
+- quatro detectores de Tesouraria: conduta de Renda Fixa, participação observada,
+  resposta pós-negócio e principal versus cliente;
+- contratos de PU, taxa, spread, duration, DV01, duas pontas, capacidade e cobertura;
+- serviço de referência temporal sem look-ahead e com freshness;
 - tratamento explícito de evidência degradada e resultado inconclusivo;
 - grafo temporal antes da priorização;
 - separação entre evento, feature, finding, alerta e caso;
@@ -71,6 +75,21 @@ A solução foi desenhada como **local-first e cloud-ready**. O mesmo núcleo de
 
 A solução atual não comprova eficácia regulatória com dados reais, capacidade de produção, recall, precisão, segurança institucional completa ou aderência jurídica automática. Aurora, Neptune, Kinesis, autenticação corporativa, infraestrutura como código e disaster recovery são etapas do alvo AWS, não funcionalidades ocultas ou falsamente simuladas.
 
+### 2.3 Evolução de Tesouraria — atual versus alvo
+
+| Capacidade | Implementado nesta versão | Próximo gate institucional |
+|---|---|---|
+| Negócio de Renda Fixa | PU, taxa, spread, duration, DV01, emissor e duas pontas | convenções e contratos aprovados por produto |
+| Papel econômico | client, treasury prop, related party, instituição, MM e broker | cobertura real mensurada e entity resolution corporativa |
+| Referência | seleção temporal, no-look-ahead, freshness, fonte e método | feeds licenciados e metodologia aprovada |
+| Participação | financeiro, quantidade e contagem com coverage ratio | comprovação do universo por fonte e coorte |
+| Resposta pós-negócio | associação por PU/taxa dentro do horizonte | eventos, liquidez e benchmarks reais |
+| Principal versus cliente | fluxo repetido e desvio adverso contra referência | UAT, adjudicação e política de conduta aprovada |
+| AWS | portas, adaptadores iniciais e container | ECS/S3/SQS, depois Aurora/Neptune/Kinesis por gate |
+
+Detalhes, fórmulas e roteiro de apresentação estão em
+[VÉRTICE para Tesouraria e Renda Fixa](TREASURY_FIXED_INCOME.md).
+
 ---
 
 ## 3. Drivers e princípios arquiteturais
@@ -84,7 +103,8 @@ A solução atual não comprova eficácia regulatória com dados reais, capacida
 | Investigação humana | prioridade organiza fila; decisão permanece com pessoas autorizadas |
 | Auditabilidade | IDs, versões, evidências e transições permitem reconstruir o caminho |
 | Replay e idempotência | a mesma entrada e política geram as mesmas identidades lógicas |
-| Quatro cenários independentes | cada detector tem dados mínimos e caminho inconclusivo próprios |
+| Oito cenários independentes | cada detector tem dados mínimos e caminho inconclusivo próprios |
+| Semântica de Tesouraria | referência, papel econômico e cobertura são dados de primeira classe |
 | Adoção AWS sem lock-in do domínio | SDKs de cloud ficam nos adaptadores |
 | Segurança e privacidade | acesso mínimo, tokenização, retenção decidida e IA fora do caminho crítico |
 | Evolução incremental | golden cases → shadow → UAT → produção controlada |
@@ -151,7 +171,7 @@ O VÉRTICE recebe dados autorizados e produz artefatos investigativos. Não exec
 | Contratos | Pydantic, campos extras proibidos | catálogo, schema registry e versionamento formal |
 | Qualidade | manifesto, duplicidade e referências | Glue Data Quality e quarentena |
 | Evidência | JSON atômico em filesystem | S3 Versioning, KMS e Object Lock aprovado |
-| Detecção | quatro detectores | execução distribuída e calibrada |
+| Detecção | oito detectores | execução distribuída e calibrada por produto/coorte |
 | Grafo | relações temporais em memória | Neptune após sizing e entity resolution |
 | Correlação | agrupamento por sujeito | serviço escalável com histórico institucional |
 | Prioridade | função logística configurável | política calibrada, monitorada e aprovada |
@@ -1196,7 +1216,9 @@ Veja também [Limitações e não alegações](LIMITATIONS.md).
 ### 28.1 Demonstração
 
 - [x] executa sem dependência AWS;
-- [x] apresenta quatro cenários;
+- [x] apresenta oito cenários;
+- [x] representa Renda Fixa, duas pontas, referência e cobertura;
+- [x] impede look-ahead na referência de entrada;
 - [x] apresenta controle benigno;
 - [x] produz inconclusivo quando falta evidência;
 - [x] mantém IA fora do caminho crítico;

@@ -47,6 +47,15 @@ class RiskPolicy:
         if {"CONCENTRATION", "MANIPULATION_BEHAVIOR"}.issubset(scenarios):
             interactions.append("CONCENTRATION_PLUS_PRICE_BEHAVIOR")
             interaction_value += self.weights.concentration_price
+        if {
+            "FIXED_INCOME_OBSERVED_PARTICIPATION",
+            "FIXED_INCOME_POST_TRADE_RESPONSE",
+        }.issubset(scenarios):
+            interactions.append("OBSERVED_PARTICIPATION_PLUS_POST_TRADE_RESPONSE")
+            interaction_value += self.weights.participation_response
+        if {"FIXED_INCOME_CONDUCT", "PRINCIPAL_CUSTOMER_CONDUCT"}.issubset(scenarios):
+            interactions.append("VALUATION_PLUS_PRINCIPAL_CUSTOMER_CONDUCT")
+            interaction_value += self.weights.valuation_principal_customer
 
         z_value = (
             self.weights.intercept
@@ -81,7 +90,9 @@ class RiskPolicy:
             "O score é prioridade operacional, não probabilidade de culpa.",
         ]
         if any(item.evidence_quality != EvidenceQuality.COMPLETE for item in findings):
-            explanation.append("Há evidência ausente/degradada; isso foi sinalizado, não descontado silenciosamente.")
+            explanation.append(
+                "Há evidência ausente/degradada; isso foi sinalizado, não descontado silenciosamente."
+            )
         return RiskExplanation(
             priority=priority,
             priority_class=priority_class,  # type: ignore[arg-type]

@@ -101,7 +101,7 @@ class BedrockInvestigativeAssistant:
 
 def boto3_client(service: str, region: str) -> Any:
     try:
-        import boto3  # type: ignore[import-not-found]
+        import boto3
     except ImportError as error:  # pragma: no cover - depende do extra aws
         raise RuntimeError("instale o extra AWS: pip install 'vertice-surveillance[aws]'") from error
     return boto3.client(service, region_name=region)

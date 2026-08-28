@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 
 class FrozenModel(BaseModel):
@@ -50,6 +50,37 @@ class CaseState(StrEnum):
     REOPENED = "REOPENED"
 
 
+class ActorType(StrEnum):
+    CLIENT = "CLIENT"
+    TREASURY_PROP = "TREASURY_PROP"
+    RELATED_PARTY = "RELATED_PARTY"
+    INSTITUTION = "INSTITUTION"
+    MARKET_MAKER = "MARKET_MAKER"
+    BROKER = "BROKER"
+    UNKNOWN = "UNKNOWN"
+
+
+class ExecutionCapacity(StrEnum):
+    AGENCY = "AGENCY"
+    PRINCIPAL = "PRINCIPAL"
+    RISKLESS_PRINCIPAL = "RISKLESS_PRINCIPAL"
+    UNKNOWN = "UNKNOWN"
+
+
+class FixedIncomeProduct(StrEnum):
+    DEBENTURE = "DEBENTURE"
+    LF = "LF"
+    CRI_CRA = "CRI_CRA"
+    GOVERNMENT_BOND = "GOVERNMENT_BOND"
+    OTHER = "OTHER"
+
+
+class CoverageUniverse(StrEnum):
+    INTERNAL_OBSERVED = "INTERNAL_OBSERVED"
+    REGULATORY_REPORTED = "REGULATORY_REPORTED"
+    VENUE_COMPLETE = "VENUE_COMPLETE"
+
+
 class TradeEvent(FrozenModel):
     trade_id: str
     event_time: datetime
@@ -82,6 +113,104 @@ class TradeEvent(FrozenModel):
     @property
     def notional(self) -> float:
         return self.price * self.quantity
+
+
+class FixedIncomeTrade(FrozenModel):
+    """Negócio de Renda Fixa com as duas pontas e capacidade econômica explícitas."""
+
+    trade_id: str
+    event_time: datetime
+    source_update_time: datetime | None = None
+    ingest_time: datetime | None = None
+    instrument_id: str
+    product_type: FixedIncomeProduct
+    issuer_id: str | None = None
+    buyer_party_id: str
+    buyer_actor_type: ActorType
+    seller_party_id: str
+    seller_actor_type: ActorType
+    buyer_account_id: str | None = None
+    seller_account_id: str | None = None
+    execution_capacity: ExecutionCapacity = ExecutionCapacity.UNKNOWN
+    desk_id: str | None = None
+    book_id: str | None = None
+    trader_id: str | None = None
+    price_unit: float = Field(gt=0)
+    quantity: float = Field(gt=0)
+    financial_value: float = Field(gt=0)
+    yield_rate: float | None = Field(default=None, gt=-1)
+    spread_bps: float | None = None
+    duration_years: float | None = Field(default=None, gt=0)
+    dv01: float | None = Field(default=None, gt=0)
+    currency: str = "BRL"
+    source_system: str = "TREASURY_LEDGER"
+    status: Literal["CONFIRMED", "CANCELLED", "CORRECTED"] = "CONFIRMED"
+
+    @field_validator("event_time", "source_update_time", "ingest_time")
+    @classmethod
+    def require_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is not None and value.tzinfo is None:
+            raise ValueError("timestamps devem conter timezone")
+        return value
+
+
+class FixedIncomeReference(FrozenModel):
+    """Referência contemporânea e versionada para um instrumento de Renda Fixa."""
+
+    reference_id: str
+    instrument_id: str
+    product_type: FixedIncomeProduct
+    reference_time: datetime
+    source: str
+    methodology_version: str
+    price_unit: float | None = Field(default=None, gt=0)
+    yield_rate: float | None = Field(default=None, gt=-1)
+    spread_bps: float | None = None
+    benchmark_curve_id: str | None = None
+    duration_years: float | None = Field(default=None, gt=0)
+    dv01: float | None = Field(default=None, gt=0)
+    liquidity_band_bps: float | None = Field(default=None, gt=0)
+    freshness_seconds: int = Field(default=0, ge=0)
+    confidence: float = Field(default=1, ge=0, le=1)
+
+    @field_validator("reference_time")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("timestamps devem conter timezone")
+        return value
+
+    @model_validator(mode="after")
+    def require_observable(self) -> FixedIncomeReference:
+        if self.price_unit is None and self.yield_rate is None and self.spread_bps is None:
+            raise ValueError("referência exige PU, taxa ou spread")
+        return self
+
+
+class MarketCoverageSnapshot(FrozenModel):
+    """Declara o denominador e sua cobertura; não transforma amostra em market share."""
+
+    instrument_id: str
+    window_start: datetime
+    window_end: datetime
+    source: str
+    universe: CoverageUniverse
+    coverage_ratio: float = Field(ge=0, le=1)
+    observed_record_count: int = Field(ge=0)
+    expected_record_count: int | None = Field(default=None, ge=0)
+
+    @field_validator("window_start", "window_end")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("timestamps devem conter timezone")
+        return value
+
+    @model_validator(mode="after")
+    def validate_window(self) -> MarketCoverageSnapshot:
+        if self.window_end < self.window_start:
+            raise ValueError("window_end deve ser posterior a window_start")
+        return self
 
 
 class OrderEvent(FrozenModel):
@@ -174,6 +303,8 @@ class LoadManifest(FrozenModel):
     business_date: date
     expected_record_count: int = Field(ge=0)
     expected_gross_notional: float = Field(ge=0)
+    expected_fixed_income_record_count: int | None = Field(default=None, ge=0)
+    expected_fixed_income_financial_value: float | None = Field(default=None, ge=0)
     sha256: str
 
 
@@ -186,6 +317,9 @@ class SurveillanceDataset(FrozenModel):
     clients: tuple[ClientSnapshot, ...] = ()
     market_references: tuple[MarketReference, ...] = ()
     otc_trades: tuple[OtcTrade, ...] = ()
+    fixed_income_trades: tuple[FixedIncomeTrade, ...] = ()
+    fixed_income_references: tuple[FixedIncomeReference, ...] = ()
+    market_coverage: tuple[MarketCoverageSnapshot, ...] = ()
     relationships: tuple[RelationshipEdge, ...] = ()
     manifest: LoadManifest | None = None
 
@@ -205,6 +339,8 @@ class QualityReport(FrozenModel):
     issues: tuple[QualityIssue, ...]
     record_count: int
     gross_notional: float
+    fixed_income_record_count: int = 0
+    fixed_income_financial_value: float = 0
 
 
 FeatureValue = float | int | str | bool | None

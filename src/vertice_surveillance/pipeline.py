@@ -16,8 +16,12 @@ from .config import PolicyConfig
 from .detectors import (
     ChurningDetector,
     ConcentrationDetector,
+    FixedIncomeMarketConductDetector,
     ManipulationBehaviorDetector,
+    ObservedParticipationDetector,
     OtcComplexDetector,
+    PostTradeMarketResponseDetector,
+    PrincipalCustomerConductDetector,
 )
 from .graph import TemporalGraphEnricher
 from .ids import stable_id
@@ -57,6 +61,36 @@ class SurveillancePipeline:
                 cost_equity_threshold=policy.churning.cost_equity_threshold,
             ),
             OtcComplexDetector(ipv_z_threshold=policy.otc.ipv_z_threshold),
+            FixedIncomeMarketConductDetector(
+                price_deviation_bps_threshold=(
+                    policy.fixed_income_conduct.price_deviation_bps_threshold
+                ),
+                yield_deviation_bps_threshold=(
+                    policy.fixed_income_conduct.yield_deviation_bps_threshold
+                ),
+                spread_deviation_bps_threshold=(
+                    policy.fixed_income_conduct.spread_deviation_bps_threshold
+                ),
+                max_reference_age_seconds=(policy.fixed_income_conduct.max_reference_age_seconds),
+            ),
+            ObservedParticipationDetector(
+                notional_share_threshold=(policy.observed_participation.notional_share_threshold),
+                quantity_share_threshold=(policy.observed_participation.quantity_share_threshold),
+                trade_share_threshold=policy.observed_participation.trade_share_threshold,
+                minimum_trade_count=policy.observed_participation.minimum_trade_count,
+                minimum_coverage_ratio=(policy.observed_participation.minimum_coverage_ratio),
+            ),
+            PostTradeMarketResponseDetector(
+                response_threshold_bps=policy.post_trade_response.response_threshold_bps,
+                minimum_aligned_events=(policy.post_trade_response.minimum_aligned_events),
+                horizon_seconds=policy.post_trade_response.horizon_seconds,
+                max_reference_age_seconds=(policy.post_trade_response.max_reference_age_seconds),
+            ),
+            PrincipalCustomerConductDetector(
+                adverse_price_bps_threshold=(policy.principal_customer.adverse_price_bps_threshold),
+                minimum_trade_count=policy.principal_customer.minimum_trade_count,
+                max_reference_age_seconds=(policy.principal_customer.max_reference_age_seconds),
+            ),
         )
         self.correlation = CorrelationEngine(
             RiskPolicy(version=policy.policy_version, weights=policy.risk)
@@ -106,6 +140,7 @@ class SurveillancePipeline:
         metrics: dict[str, float | int | str] = {
             "quality_passed": int(quality.passed),
             "trade_count": quality.record_count,
+            "fixed_income_trade_count": quality.fixed_income_record_count,
             "finding_count": len(findings),
             "alert_count": len(alerts),
             "case_count": len(cases),
@@ -113,6 +148,7 @@ class SurveillancePipeline:
                 item.disposition.value == "INCONCLUSIVE" for item in findings
             ),
             "scenario_coverage": len({item.scenario for item in findings}),
+            "scenario_catalog_size": len(self.detectors),
             "audit_chain_valid": int(self.case_manager.ledger.verify()),
             "duration_ms": round((completed - started).total_seconds() * 1000, 3),
         }

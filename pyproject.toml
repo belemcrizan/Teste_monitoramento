@@ -49,3 +49,7 @@ ignore = ["E501"]
 python_version = "3.11"
 strict = true
 packages = ["vertice_surveillance"]
+
+[[tool.mypy.overrides]]
+module = ["boto3", "botocore.*"]
+ignore_missing_imports = true
