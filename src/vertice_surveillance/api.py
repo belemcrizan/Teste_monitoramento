@@ -88,8 +88,7 @@ def create_app(pipeline: SurveillancePipeline | None = None) -> FastAPI:
         if service.case_manager.repository.get(case_id) is None:
             raise HTTPException(status_code=404, detail="Caso não encontrado.")
         return [
-            item.model_dump(mode="json")
-            for item in service.case_manager.ledger.records(case_id)
+            item.model_dump(mode="json") for item in service.case_manager.ledger.records(case_id)
         ]
 
     @app.get("/demo", response_class=HTMLResponse)
@@ -122,7 +121,7 @@ DEMO_HTML = """<!doctype html>
 <body><main>
   <div class="eyebrow">Surveillance intelligence • evidence first</div>
   <h1>VÉRTICE</h1>
-  <p class="sub">Dos eventos reconciliados a casos auditáveis. Quatro detectores produzem achados; o grafo enriquece; a política correlaciona; pessoas decidem.</p>
+  <p class="sub">Dos eventos reconciliados a casos auditáveis. O catálogo modular inclui mercado listado, OTC e Renda Fixa/Tesouraria; o grafo enriquece, a política correlaciona e pessoas decidem.</p>
   <button id="run">Executar golden cases</button><span id="status" class="muted"></span>
   <section id="metrics" class="grid"></section>
   <section class="card" style="margin-top:14px"><h2>Casos investigativos</h2><div id="cases" class="muted">Execute a demonstração.</div></section>
@@ -131,6 +130,5 @@ DEMO_HTML = """<!doctype html>
 </main><script>
 const button=document.querySelector('#run'),status=document.querySelector('#status');
 button.onclick=async()=>{button.disabled=true;status.textContent=' Processando…';try{const response=await fetch('/v1/demo/run',{method:'POST'});const run=await response.json();render(run);status.textContent=' Execução concluída.'}catch(error){status.textContent=' Falha: '+error}finally{button.disabled=false}};
-function render(run){const items=[['Negócios',run.quality.record_count],['Findings',run.findings.length],['Alertas',run.alerts.length],['Casos',run.cases.length],['Cobertura',run.metrics.scenario_coverage+'/4'],['Audit chain',run.metrics.audit_chain_valid?'Válida':'Inválida']];document.querySelector('#metrics').innerHTML=items.map(x=>`<div class="card"><div class="metric">${x[1]}</div><div class="label">${x[0]}</div></div>`).join('');document.querySelector('#cases').innerHTML=`<table><thead><tr><th>Caso</th><th>Sujeito</th><th>Estado</th><th>Prioridade</th></tr></thead><tbody>${run.cases.map(c=>`<tr><td><code>${c.case_id}</code></td><td>${c.subject_id}</td><td><span class="pill">${c.state}</span></td><td>${c.priority.toFixed(2)}</td></tr>`).join('')}</tbody></table>`}
+function render(run){const items=[['Listados',run.quality.record_count],['Renda Fixa',run.quality.fixed_income_record_count],['Findings',run.findings.length],['Alertas',run.alerts.length],['Casos',run.cases.length],['Cobertura',run.metrics.scenario_coverage+'/'+run.metrics.scenario_catalog_size],['Audit chain',run.metrics.audit_chain_valid?'Válida':'Inválida']];document.querySelector('#metrics').innerHTML=items.map(x=>`<div class="card"><div class="metric">${x[1]}</div><div class="label">${x[0]}</div></div>`).join('');document.querySelector('#cases').innerHTML=`<table><thead><tr><th>Caso</th><th>Sujeito</th><th>Estado</th><th>Prioridade</th></tr></thead><tbody>${run.cases.map(c=>`<tr><td><code>${c.case_id}</code></td><td>${c.subject_id}</td><td><span class="pill">${c.state}</span></td><td>${c.priority.toFixed(2)}</td></tr>`).join('')}</tbody></table>`}
   </script></body></html>"""
-

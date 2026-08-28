@@ -1,17 +1,24 @@
 """Golden cases sintéticos, transparentes e determinísticos.
 
 Os dados não representam pessoas nem eventos reais. Eles foram desenhados para
-exercitar sinais, contrafatos e falhas seguras dos quatro eixos.
+exercitar sinais, contrafatos e falhas seguras do catálogo completo.
 """
 
 from __future__ import annotations
 
 import hashlib
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from .models import (
+    ActorType,
     ClientSnapshot,
+    CoverageUniverse,
+    ExecutionCapacity,
+    FixedIncomeProduct,
+    FixedIncomeReference,
+    FixedIncomeTrade,
     LoadManifest,
+    MarketCoverageSnapshot,
     OtcTrade,
     PositionSnapshot,
     RelationshipEdge,
@@ -247,6 +254,183 @@ def build_demo_dataset() -> SurveillanceDataset:
             product_complexity=5,
         ),
     )
+    fixed_income_trades = (
+        FixedIncomeTrade(
+            trade_id="FI-CLIENT-01",
+            event_time=_dt(28, 10),
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            issuer_id="ISSUER-ALPHA",
+            buyer_party_id="CLIENT-FI",
+            buyer_actor_type=ActorType.CLIENT,
+            seller_party_id="TREASURY-DESK",
+            seller_actor_type=ActorType.TREASURY_PROP,
+            buyer_account_id="ACC-FI",
+            execution_capacity=ExecutionCapacity.PRINCIPAL,
+            desk_id="DESK-RF",
+            book_id="BOOK-CREDIT",
+            trader_id="TRADER-01",
+            price_unit=101.20,
+            quantity=100,
+            financial_value=101_200,
+            yield_rate=0.135,
+            spread_bps=320,
+            duration_years=3.2,
+            dv01=32.4,
+        ),
+        FixedIncomeTrade(
+            trade_id="FI-CLIENT-02",
+            event_time=_dt(28, 10, 10),
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            issuer_id="ISSUER-ALPHA",
+            buyer_party_id="CLIENT-FI",
+            buyer_actor_type=ActorType.CLIENT,
+            seller_party_id="TREASURY-DESK",
+            seller_actor_type=ActorType.TREASURY_PROP,
+            buyer_account_id="ACC-FI",
+            execution_capacity=ExecutionCapacity.PRINCIPAL,
+            desk_id="DESK-RF",
+            book_id="BOOK-CREDIT",
+            trader_id="TRADER-01",
+            price_unit=101.50,
+            quantity=120,
+            financial_value=121_800,
+            yield_rate=0.136,
+            spread_bps=330,
+            duration_years=3.2,
+            dv01=38.9,
+        ),
+        FixedIncomeTrade(
+            trade_id="FI-CLIENT-03",
+            event_time=_dt(28, 10, 20),
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            issuer_id="ISSUER-ALPHA",
+            buyer_party_id="CLIENT-FI",
+            buyer_actor_type=ActorType.CLIENT,
+            seller_party_id="TREASURY-DESK",
+            seller_actor_type=ActorType.TREASURY_PROP,
+            buyer_account_id="ACC-FI",
+            execution_capacity=ExecutionCapacity.PRINCIPAL,
+            desk_id="DESK-RF",
+            book_id="BOOK-CREDIT",
+            trader_id="TRADER-01",
+            price_unit=101.80,
+            quantity=130,
+            financial_value=132_340,
+            yield_rate=0.137,
+            spread_bps=340,
+            duration_years=3.2,
+            dv01=42.1,
+        ),
+        *tuple(
+            FixedIncomeTrade(
+                trade_id=f"FI-MARKET-{index:02d}",
+                event_time=_dt(28, 10, 1 + index * 6),
+                instrument_id="DEB-ALPHA",
+                product_type=FixedIncomeProduct.DEBENTURE,
+                issuer_id="ISSUER-ALPHA",
+                buyer_party_id=f"INSTITUTION-{index}",
+                buyer_actor_type=ActorType.INSTITUTION,
+                seller_party_id=f"MARKET-MAKER-{index}",
+                seller_actor_type=ActorType.MARKET_MAKER,
+                execution_capacity=ExecutionCapacity.PRINCIPAL,
+                price_unit=100.10 + index * 0.15,
+                quantity=75,
+                financial_value=(100.10 + index * 0.15) * 75,
+                yield_rate=0.12,
+                spread_bps=150,
+            )
+            for index in range(4)
+        ),
+    )
+    fixed_income_references = (
+        FixedIncomeReference(
+            reference_id="FI-REF-0959",
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            reference_time=_dt(28, 9, 59),
+            source="SYNTHETIC_COMPOSITE",
+            methodology_version="1.0.0",
+            price_unit=100.00,
+            yield_rate=0.120,
+            spread_bps=150,
+            benchmark_curve_id="DI-PRE",
+        ),
+        FixedIncomeReference(
+            reference_id="FI-REF-1005",
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            reference_time=_dt(28, 10, 5),
+            source="SYNTHETIC_COMPOSITE",
+            methodology_version="1.0.0",
+            price_unit=100.25,
+            yield_rate=0.119,
+            spread_bps=145,
+            benchmark_curve_id="DI-PRE",
+        ),
+        FixedIncomeReference(
+            reference_id="FI-REF-1009",
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            reference_time=_dt(28, 10, 9),
+            source="SYNTHETIC_COMPOSITE",
+            methodology_version="1.0.0",
+            price_unit=100.25,
+            yield_rate=0.119,
+            spread_bps=145,
+            benchmark_curve_id="DI-PRE",
+        ),
+        FixedIncomeReference(
+            reference_id="FI-REF-1015",
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            reference_time=_dt(28, 10, 15),
+            source="SYNTHETIC_COMPOSITE",
+            methodology_version="1.0.0",
+            price_unit=100.55,
+            yield_rate=0.118,
+            spread_bps=140,
+            benchmark_curve_id="DI-PRE",
+        ),
+        FixedIncomeReference(
+            reference_id="FI-REF-1019",
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            reference_time=_dt(28, 10, 19),
+            source="SYNTHETIC_COMPOSITE",
+            methodology_version="1.0.0",
+            price_unit=100.55,
+            yield_rate=0.118,
+            spread_bps=140,
+            benchmark_curve_id="DI-PRE",
+        ),
+        FixedIncomeReference(
+            reference_id="FI-REF-1025",
+            instrument_id="DEB-ALPHA",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            reference_time=_dt(28, 10, 25),
+            source="SYNTHETIC_COMPOSITE",
+            methodology_version="1.0.0",
+            price_unit=100.90,
+            yield_rate=0.117,
+            spread_bps=135,
+            benchmark_curve_id="DI-PRE",
+        ),
+    )
+    market_coverage = (
+        MarketCoverageSnapshot(
+            instrument_id="DEB-ALPHA",
+            window_start=_dt(28, 9),
+            window_end=_dt(28, 18),
+            source="SYNTHETIC_REGULATORY_FEED",
+            universe=CoverageUniverse.REGULATORY_REPORTED,
+            coverage_ratio=0.95,
+            observed_record_count=len(fixed_income_trades),
+            expected_record_count=len(fixed_income_trades),
+        ),
+    )
     relationships = (
         RelationshipEdge(
             from_id="CLIENT-A",
@@ -293,6 +477,10 @@ def build_demo_dataset() -> SurveillanceDataset:
         business_date=date(2026, 8, 28),
         expected_record_count=len(trades),
         expected_gross_notional=gross_notional,
+        expected_fixed_income_record_count=len(fixed_income_trades),
+        expected_fixed_income_financial_value=sum(
+            trade.financial_value for trade in fixed_income_trades
+        ),
         sha256=hashlib.sha256(b"vertice-demo-20260828").hexdigest(),
     )
     return SurveillanceDataset(
@@ -302,6 +490,9 @@ def build_demo_dataset() -> SurveillanceDataset:
         positions=positions,
         clients=clients,
         otc_trades=otc_trades,
+        fixed_income_trades=fixed_income_trades,
+        fixed_income_references=fixed_income_references,
+        market_coverage=market_coverage,
         relationships=relationships,
         manifest=manifest,
     )
@@ -348,11 +539,59 @@ def build_benign_dataset() -> SurveillanceDataset:
         market_value=500,
         average_equity=1_000_000,
     )
+    fixed_income_trades = tuple(
+        FixedIncomeTrade(
+            trade_id=f"FI-BENIGN-{index}",
+            event_time=_dt(28, 13, index * 5),
+            instrument_id="DEB-BENIGN",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            issuer_id="ISSUER-BENIGN",
+            buyer_party_id=f"CLIENT-BENIGN-FI-{index}",
+            buyer_actor_type=ActorType.CLIENT,
+            seller_party_id=f"INSTITUTION-BENIGN-{index}",
+            seller_actor_type=ActorType.INSTITUTION,
+            execution_capacity=ExecutionCapacity.AGENCY,
+            price_unit=100.0,
+            quantity=10,
+            financial_value=1_000,
+            yield_rate=0.11,
+            spread_bps=100,
+        )
+        for index in range(3)
+    )
+    fixed_income_references = tuple(
+        FixedIncomeReference(
+            reference_id=f"FI-REF-BENIGN-{index}",
+            instrument_id="DEB-BENIGN",
+            product_type=FixedIncomeProduct.DEBENTURE,
+            reference_time=_dt(28, 12, 59) + timedelta(minutes=index * 5),
+            source="SYNTHETIC_COMPOSITE",
+            methodology_version="1.0.0",
+            price_unit=100.0,
+            yield_rate=0.11,
+            spread_bps=100,
+        )
+        for index in range(4)
+    )
+    market_coverage = (
+        MarketCoverageSnapshot(
+            instrument_id="DEB-BENIGN",
+            window_start=_dt(28, 12),
+            window_end=_dt(28, 14),
+            source="SYNTHETIC_REGULATORY_FEED",
+            universe=CoverageUniverse.REGULATORY_REPORTED,
+            coverage_ratio=1,
+            observed_record_count=3,
+            expected_record_count=3,
+        ),
+    )
     return SurveillanceDataset(
         snapshot_id="SNAPSHOT-BENIGN-20260828",
         as_of=_dt(28, 23, 59),
         trades=trades,
         clients=(client,),
         positions=(position,),
+        fixed_income_trades=fixed_income_trades,
+        fixed_income_references=fixed_income_references,
+        market_coverage=market_coverage,
     )
-

@@ -27,8 +27,8 @@ Resultado de referência:
 VÉRTICE — execução concluída
 run_id: RUN-5353610D6E486F06
 quality: PASS
-findings: 5 | alerts: 4 | cases: 4
-scenario_coverage: 4/4
+findings: 11 | alerts: 6 | cases: 6
+scenario_coverage: 8/8
 ```
 
 Abra `artifacts/RUN-5353610D6E486F06/REPORT.md` e depois:
@@ -65,12 +65,16 @@ Explique `Feature → Finding → Alert → Case`. A regra produz evidência; co
 
 Mostre `quality: PASS` e o warning `OTC_VALUATION_PARTIAL`. Ressalte que o warning não desapareceu: virou caso aguardando evidência.
 
-### 3:00–5:00 — quatro detectores
+### 3:00–5:00 — catálogo de oito detectores
 
 - concentração: participação no universo observado, recorrência e simetria;
 - manipulação: janela, desvio, direção, participação e posição beneficiada;
 - churning: turnover, custo/equity, reversões e controle desconhecido;
 - OTC: desvio IPV, suitability/complexidade e rollover.
+- Renda Fixa: PU, taxa e spread contra referência contemporânea;
+- participação observada: três denominadores e cobertura declarada;
+- resposta pós-negócio: associação temporal sem alegação causal;
+- principal versus cliente: preço adverso contra benchmark, sem conclusão de conflito.
 
 ### 5:00–6:00 — grafo e correlação
 
@@ -118,3 +122,6 @@ O teste end-to-end benigno não cria findings nem casos.
 
 **Os thresholds são reais?** Não. São configuração ilustrativa e versionada. Produção exige replay, coortes, capacidade da equipe e aprovação.
 
+**Isso prova dominância ou influência de preço?** Não. A solução usa os termos
+“participação no universo observado” e “resposta pós-negócio” justamente para preservar
+o limite da evidência.

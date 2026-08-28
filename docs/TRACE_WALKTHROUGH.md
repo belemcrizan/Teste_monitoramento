@@ -2,7 +2,9 @@
 
 ## Dataset
 
-O fixture é sintético, datado e imutável. Ele contém 15 negócios confirmados, cinco clientes, três posições, duas estruturas OTC e quatro relações temporais.
+O fixture é sintético, datado e imutável. Ele contém 15 negócios listados confirmados,
+sete negócios de Renda Fixa, cinco snapshots de cliente, três posições, duas estruturas
+OTC, seis referências de Renda Fixa, um snapshot de cobertura e quatro relações temporais.
 
 ## CLIENT-A — evidência correlacionada
 
@@ -94,6 +96,30 @@ O detector não calcula zero e não afirma normalidade. Ele produz `INCONCLUSIVE
 
 Este é um teste central da arquitetura: uma ausência crítica gera trabalho explícito e rastreável.
 
+## CLIENT-FI e TREASURY-DESK — Tesouraria/Renda Fixa
+
+### Fatos
+
+- três compras da mesma debênture pelo cliente contra Tesouraria proprietária;
+- PU, taxa e spread afastados das referências sintéticas contemporâneas;
+- três movimentos posteriores alinhados ao lado comprador;
+- cobertura declarada de 95% do universo regulatório sintético;
+- capacidade `PRINCIPAL`, mesa, book e trader identificados.
+
+### Resultado
+
+O cliente recebe quatro findings correlacionados: conduta de Renda Fixa, participação
+observada, resposta pós-negócio e principal versus cliente. A mesa recebe os findings
+aplicáveis ao seu próprio papel econômico. O denominador de mercado conta cada negócio
+uma vez, embora as duas pontas possam receber contexto investigativo.
+
+### Limites
+
+O caso não prova dominância, influência de preço, conflito ou preço injusto. A fonte de
+referência e a cobertura são sintéticas; eventos, liquidez, mandato e hedge precisam de
+avaliação humana. Remover referências ou cobertura transforma os cenários dependentes
+em `INCONCLUSIVE`.
+
 ## Controle benigno
 
 O fixture benigno possui dois negócios pequenos, contrapartes diferentes, preços próximos à referência e patrimônio elevado. O pipeline não produz findings ou casos. Isso não mede taxa de falso positivo, mas prova que o código não classifica toda atividade como suspeita.
@@ -115,4 +141,3 @@ Case
 ```
 
 O ledger registra `CASE_CREATED` e toda transição subsequente com ator, papel, justificativa, estado anterior/novo, hash anterior e hash atual.
-

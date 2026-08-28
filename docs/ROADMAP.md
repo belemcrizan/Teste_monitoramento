@@ -1,8 +1,10 @@
 # Roadmap orientado por gates
 
-## Agora — baseline executável
+## Agora — baseline executável evoluída
 
-- quatro detectores e golden cases;
+- oito detectores e golden cases adversos/benignos/incompletos;
+- contratos de Renda Fixa, papéis econômicos e capacidade de execução;
+- referência temporal sem look-ahead e declaração de cobertura;
 - qualidade/reconciliação;
 - grafo temporal mínimo;
 - correlação/prioridade;
@@ -20,8 +22,10 @@
 5. adjudicar casos e benign hard cases;
 6. medir volume/tempo/capacidade;
 7. executar em ECS com S3/SQS no ambiente de teste.
+8. contratar/mapear fontes oficiais de curvas, PU, taxas, spreads e eventos;
+9. validar taxonomia de cliente, Tesouraria proprietária, related party e market maker.
 
-Gate: slice de concentração reproduzível e útil em shadow mode.
+Gate: slice de Renda Fixa reconciliado, sem look-ahead e útil em shadow mode.
 
 ## 60 a 120 dias
 
@@ -29,6 +33,8 @@ Gate: slice de concentração reproduzível e útil em shadow mode.
 - autenticação/roles e UI investigativa;
 - grafo Neptune e entity resolution determinística;
 - churning com lot matching/custos/controle;
+- referências por produto: debênture, LF, CRI/CRA, títulos públicos e derivativos;
+- adjudicação específica de participação, resposta pós-negócio e principal versus cliente;
 - observabilidade e dashboards reconciliados;
 - replay automatizado e change reports.
 
@@ -56,4 +62,3 @@ qualidade de dados
 ```
 
 Mais inteligência sobre dados não reconciliados apenas torna o erro mais convincente.
-

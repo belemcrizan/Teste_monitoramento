@@ -10,12 +10,17 @@
 
 O VÉRTICE é uma implementação local-first e executável da arquitetura de referência para Surveillance, Compliance, Riscos e Tecnologia. Ele foi construído para validar comportamento, contratos e rastreabilidade antes de qualquer compromisso com infraestrutura AWS.
 
-Ele cobre quatro eixos:
+Ele cobre oito cenários em dois grupos complementares:
 
-1. concentração e relacionamento recorrente;
-2. comportamentos associados à manipulação;
-3. churning e atividade potencialmente excessiva;
-4. OTC complexo, estruturas e derivativos.
+1. **baseline preservada:** concentração, comportamento associado à manipulação,
+   churning e OTC complexo;
+2. **evolução Tesouraria/Renda Fixa:** conduta por PU/taxa/spread, participação no
+   universo observado, resposta de mercado pós-negócio e principal versus cliente.
+
+A evolução adiciona ainda um serviço temporal de referências e resolução explícita
+das pontas (`CLIENT`, `TREASURY_PROP`, `RELATED_PARTY`, instituição e market maker).
+O nome da solução continua **VÉRTICE**; o estágio atual é de validação controlada,
+sem alegação de prontidão produtiva.
 
 O sistema não declara culpa, intenção, fraude ou manipulação. Cada detector produz um `Finding` técnico com fórmulas, valores, reason codes, evidências, dados ausentes e limitações. O grafo temporal enriquece os achados antes da correlação; a prioridade organiza a fila; pessoas decidem.
 
@@ -23,7 +28,11 @@ O sistema não declara culpa, intenção, fraude ou manipulação. Cada detector
 
 - contratos canônicos e timestamps conscientes de timezone;
 - manifesto, reconciliação, qualidade e bloqueio fail-closed;
-- quatro detectores independentes;
+- oito detectores independentes e configuráveis;
+- contratos próprios para Renda Fixa com PU, taxa, spread, duration e DV01;
+- referência temporal sem look-ahead e com controle de freshness;
+- comprador, vendedor, capacidade de execução, mesa, book e trader explícitos;
+- cobertura e proveniência do denominador observado;
 - `INCONCLUSIVE` quando falta evidência crítica;
 - grafo temporal e relações com vigência;
 - separação entre `Feature`, `Finding`, `Alert` e `Case`;
@@ -62,8 +71,8 @@ Saída esperada:
 ```text
 VÉRTICE — execução concluída
 quality: PASS
-findings: ... | alerts: ... | cases: ...
-scenario_coverage: 4/4
+findings: 11 | alerts: 6 | cases: 6
+scenario_coverage: 8/8
 ```
 
 Os artefatos são gravados em `artifacts/<run_id>/`: dossiês, audit trail, notas assistivas, resultado consolidado e `REPORT.md`.
@@ -87,8 +96,10 @@ No painel, selecione **Executar golden cases**. Os dados são sintéticos e exer
 ```mermaid
 flowchart TB
     A[Eventos e snapshots] --> B[Qualidade e reconciliação]
-    B --> C[Quatro detectores]
+    B --> C[Baseline listados e OTC]
+    B --> K[Tesouraria e Renda Fixa]
     C --> D[Findings explicáveis]
+    K --> D
     D --> E[Grafo temporal]
     E --> F[Correlação e prioridade]
     F --> G[Alertas e casos]
@@ -113,7 +124,7 @@ O núcleo depende de portas como `ObjectStore`, `EventPublisher`, `CaseRepositor
 
 | Capacidade | Local | AWS alvo |
 |---|---|---|
-| Evidência | JSON em filesystem | S3 com Versioning/Object Lock |
+| Evidência e referências | JSON em filesystem | S3 com Versioning/Object Lock |
 | Eventos | publisher em memória | SQS + EventBridge |
 | Casos | repositório em memória | Aurora PostgreSQL |
 | Grafo | enriquecedor em memória | Neptune |
@@ -139,7 +150,10 @@ vertice validate --dataset demo
 vertice validate --dataset benign
 ```
 
-Os testes cobrem reconciliação, duplicidade crítica, os quatro detectores, caminho inconclusivo, benign case, replay idempotente, falha da IA, grafo, score, quatro olhos, audit trail, API e adaptadores AWS com clientes falsos.
+Os **35 testes** cobrem reconciliação, duplicidade crítica, oito detectores, ausência
+de look-ahead, freshness, cobertura do denominador, caminhos inconclusivos, benign
+case, replay idempotente, falha da IA, grafo, score, quatro olhos, audit trail, API e
+adaptadores AWS com clientes falsos.
 
 ## Documentação por público
 
@@ -147,6 +161,7 @@ Os testes cobrem reconciliação, duplicidade crítica, os quatro detectores, ca
 |---|---|
 | Comitê, diretoria ou CTO | [Visão executiva](docs/EXECUTIVE_OVERVIEW.md) |
 | Analista de Surveillance/Compliance | [Guia de demonstração](docs/DEMO_GUIDE.md) e [walkthrough do caso](docs/TRACE_WALKTHROUGH.md) |
+| Tesouraria, Renda Fixa ou Produtos | [Evolução Tesouraria e Renda Fixa](docs/TREASURY_FIXED_INCOME.md) |
 | Engenharia/Arquitetura | [Arquitetura](docs/ARCHITECTURE.md) e [contratos](docs/DATA_CONTRACTS.md) |
 | Cloud/Plataforma | [Adoção AWS](docs/AWS_ADOPTION.md) e [deploy/aws](deploy/aws/README.md) |
 | Model Risk/Auditoria | [Validação](docs/VALIDATION.md) e [segurança/governança](docs/SECURITY_GOVERNANCE.md) |
@@ -154,11 +169,15 @@ Os testes cobrem reconciliação, duplicidade crítica, os quatro detectores, ca
 
 ## Limites honestos
 
-Esta versão prova que a arquitetura é implementável e testável. Ela não prova eficácia com dados reais, recall regulatório, performance em escala, aderência jurídica automática ou prontidão de produção. Os thresholds são ilustrativos; os golden cases são sintéticos; o armazenamento transacional local não substitui Aurora; e não há alegação de spoofing/layering sem order lifecycle e livro de ofertas.
+Esta versão prova que a arquitetura é implementável e testável. Ela não prova eficácia
+com dados reais, recall regulatório, performance em escala, aderência jurídica automática
+ou prontidão de produção. Os thresholds são ilustrativos; os golden cases são sintéticos;
+participação observada não é market share; resposta pós-negócio não prova influência;
+o armazenamento local não substitui Aurora; e não há alegação de spoofing/layering sem
+order lifecycle e livro de ofertas.
 
 Leia [Limitações e não alegações](docs/LIMITATIONS.md) antes de apresentar resultados.
 
 ## Licença
 
 Apache License 2.0. Consulte [LICENSE](LICENSE).
-

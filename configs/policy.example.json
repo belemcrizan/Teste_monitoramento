@@ -15,6 +15,30 @@
   "otc": {
     "ipv_z_threshold": 2.0
   },
+  "fixed_income_conduct": {
+    "price_deviation_bps_threshold": 75.0,
+    "yield_deviation_bps_threshold": 50.0,
+    "spread_deviation_bps_threshold": 75.0,
+    "max_reference_age_seconds": 3600
+  },
+  "observed_participation": {
+    "notional_share_threshold": 0.35,
+    "quantity_share_threshold": 0.35,
+    "trade_share_threshold": 0.35,
+    "minimum_trade_count": 3,
+    "minimum_coverage_ratio": 0.8
+  },
+  "post_trade_response": {
+    "response_threshold_bps": 15.0,
+    "minimum_aligned_events": 2,
+    "horizon_seconds": 900,
+    "max_reference_age_seconds": 3600
+  },
+  "principal_customer": {
+    "adverse_price_bps_threshold": 50.0,
+    "minimum_trade_count": 2,
+    "max_reference_age_seconds": 3600
+  },
   "risk": {
     "intercept": -2.0,
     "strength": 1.8,
@@ -24,7 +48,8 @@
     "history": 0.5,
     "multi_scenario": 0.35,
     "graph_relation": 0.25,
-    "concentration_price": 0.3
+    "concentration_price": 0.3,
+    "participation_response": 0.3,
+    "valuation_principal_customer": 0.3
   }
 }
-

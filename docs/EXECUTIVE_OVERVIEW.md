@@ -21,7 +21,7 @@ Uma solução executável que percorre:
 ```mermaid
 flowchart TB
     A[Dados e manifesto] --> B[Qualidade e reconciliação]
-    B --> C[Quatro detectores]
+    B --> C[Catálogo de oito detectores]
     C --> D[Grafo temporal]
     D --> E[Correlação e prioridade]
     E --> F[Alertas e casos]
@@ -29,11 +29,17 @@ flowchart TB
     G --> H[Decisão humana]
 ```
 
-Os quatro eixos são concentração, comportamentos associados à manipulação, atividade potencialmente excessiva e OTC complexo.
+Os quatro eixos originais — concentração, comportamento associado à manipulação,
+atividade potencialmente excessiva e OTC complexo — foram preservados. A evolução
+adiciona conduta de Renda Fixa, participação no universo observado, resposta de mercado
+pós-negócio e principal versus cliente, além de referências temporais e papéis econômicos.
 
 ### Resultado demonstrado
 
-Na execução de referência, 15 negócios sintéticos e duas estruturas OTC exercitam os quatro eixos. A solução produz cinco findings, quatro alertas correlacionados e quatro casos. Um caso de valuation incompleto entra em `AWAITING_EVIDENCE`, em vez de ser classificado como baixo risco.
+Na execução de referência, 15 negócios listados, sete negócios de Renda Fixa e duas
+estruturas OTC exercitam os oito cenários. A solução produz 11 findings, seis alertas e
+seis casos. Um valuation incompleto entra em `AWAITING_EVIDENCE`, em vez de ser
+classificado como baixo risco.
 
 Esse resultado valida o comportamento do software, não eficácia regulatória. Os dados e thresholds são sintéticos e ilustrativos.
 
@@ -77,7 +83,9 @@ Redução de alertas, isoladamente, não é sucesso. Ela deve ser lida com cober
 
 ## Decisão recomendada
 
-Usar o VÉRTICE como **baseline executável para discovery e piloto em shadow mode**, iniciando por concentração. O próximo investimento deve ser em dados reais anonimizados/autorizados, reconciliação, coortes e adjudicação por analistas — não em mais complexidade de modelo.
+Usar o VÉRTICE como **baseline executável para discovery e piloto em shadow mode**,
+iniciando pelo slice de Renda Fixa com melhor qualidade de referência e cobertura. O
+próximo investimento deve ser em dados reais autorizados, reconciliação, convenções por
+produto, coortes e adjudicação — não em mais complexidade de modelo.
 
 O primeiro gate de valor é simples: um slice vertical precisa ser reproduzível, explicável e considerado útil por analistas em uma amostra real. A AWS entra depois desse comportamento estar validado, por meio dos adaptadores já separados.
-
