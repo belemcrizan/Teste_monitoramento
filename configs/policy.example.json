@@ -1,0 +1,30 @@
+{
+  "policy_version": "1.0.0",
+  "concentration": {
+    "share_threshold": 0.35,
+    "recurring_days_threshold": 3,
+    "symmetry_threshold": 0.75
+  },
+  "manipulation": {
+    "robust_deviation_threshold": 2.0
+  },
+  "churning": {
+    "turnover_threshold": 2.0,
+    "cost_equity_threshold": 0.02
+  },
+  "otc": {
+    "ipv_z_threshold": 2.0
+  },
+  "risk": {
+    "intercept": -2.0,
+    "strength": 1.8,
+    "materiality": 1.0,
+    "urgency": 1.2,
+    "connectivity": 1.2,
+    "history": 0.5,
+    "multi_scenario": 0.35,
+    "graph_relation": 0.25,
+    "concentration_price": 0.3
+  }
+}
+
